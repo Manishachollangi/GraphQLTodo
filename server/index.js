@@ -1,49 +1,68 @@
+const { ApolloServer } = require("@apollo/server");
+const { expressMiddleware } = require("@apollo/server/express4");
+const { GraphQLJSON } = require("graphql-type-json");
+const {
+  ApolloServerPluginDrainHttpServer,
+} = require("@apollo/server/plugin/drainHttpServer");
 const express = require("express");
-const { v4: uuidv4 } = require("uuid");
+const http = require("http");
 const cors = require("cors");
+const bodyParser = require("body-parser");
+const typeDefs = require("./schema");
+
+const { getTodo, getTodos, addTodo, editTodo, deleteTodo } = require("./services/todo.service");
+
+console.log(typeDefs);
+
+// // The GraphQL schema
+// const typeDefs = `#graphql
+//   type Query {
+//     hello: String
+//   }
+// `;
+
+// A map of functions which return data for the schema.
+const resolvers = {
+  JSON: GraphQLJSON,
+  Query: {
+    todo: async (root, args, context) => await getTodo(args.id),
+    todos: async (root, args, context) => await getTodos(),
+  },
+  Mutation: {
+    addTodo: async (root, args, context) => {
+      const { title, desc } = args.input;
+      const todo = await addTodo(title, desc);
+      return todo;
+    },
+    editTodo: async (root, args, context) => {
+      const { id, title, desc } = args.input;
+      const todo = await editTodo(id, title, desc);
+      return todo;
+    },
+    deleteTodo: async (root, args, context) => {
+      const { id } = args.input;
+      const todo = await deleteTodo(id);
+      return todo;
+    }
+  },
+};
 
 const app = express();
+const httpServer = http.createServer(app);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-const corsOption = {
-  origin: ["http://localhost:3000"],
-};
-app.use(cors(corsOption));
-
-let todos = {};
-
-app.get("/todos", (req, res) => {
-  res.status(200).json(todos);
+// Set up Apollo Server
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
+server.start().then(() => {
+  app.use(cors(), bodyParser.json(), expressMiddleware(server));
 
-app.get("/todos/:id", (req, res) => {
-  const { id } = req.params;
-  res.status(200).json(todos[id]);
-});
-
-app.post("/todos", (req, res) => {
-  let id = uuidv4();
-  const { title, desc } = req.body;
-  todos[id] = { id, title, desc };
-  res.status(200).json(todos[id]);
-});
-
-app.delete("/todos/:id", (req, res) => {
-  const { id } = req.params;
-  delete todos[id];
-  res.status(200).json(todos);
-});
-
-app.put("/todos/:id", (req, res) => {
-  const { id } = req.params;
-  const { title, desc } = req.body;
-  console.log(title, desc, id);
-  todos[id] = { id: id, title: title, desc: desc };
-  res.status(200).json(todos[id]);
-});
-
-app.listen(5000, () => {
-  console.log("server listening to port 5000");
+  const pr = new Promise((resolve) =>
+    httpServer.listen({ port: 5000 }, resolve)
+  );
+  pr.then(() => {
+    console.log(`🚀 Server ready at http://localhost:5000`);
+  });
 });
