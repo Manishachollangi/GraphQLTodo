@@ -1,0 +1,41 @@
+.task {
+    width: 300px;
+    display: flex;
+    align-items: center;
+    border: 1px solid gray;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 4px;
+    box-shadow: 0 0 4px 4px rgba(211, 211, 211, 0.4);
+}
+
+.add {
+    width: 300px;
+    border: 1px solid gray;
+    background-color: rgb(75, 58, 175,0.5);
+    color: white;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 4px;
+    box-shadow: 0 0 4px 4px rgba(211, 211, 211, 0.4);
+    text-align: center;
+    letter-spacing: 2px;
+    cursor: pointer;
+}
+
+.mark {
+    margin-left: auto;
+    cursor: pointer;
+}
+
+.edit {
+    margin-left: 6px;
+  cursor: pointer;
+}
+
+
+a {
+    text-decoration: none;
+    color: green
+}
+
