@@ -33,6 +33,9 @@
   cursor: pointer;
 }
 
+.delete {
+    cursor: pointer; 
+}
 
 a {
     text-decoration: none;
