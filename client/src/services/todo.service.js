@@ -1,49 +1,53 @@
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+
+ const url = 'http://localhost:5000/todos'
 
  export const getTasks = () => {
     return new Promise((resolve,reject) => {
-       resolve( JSON.parse(localStorage.getItem('tasks')) || {} )
-    })
+       axios.get(url).then(res => {
+         resolve( res.data );
+       });
+    });
 }
 
 export const addTask = (title,desc) => {
     return new Promise((resolve,reject) => {
-      let id = uuidv4()
        let task = {
-         id,
          title,
          desc
-       }
-       const tasks = JSON.parse(localStorage.getItem('tasks')) || {}
-       tasks[id]= task
-       localStorage.setItem('tasks',JSON.stringify(tasks))
-       resolve(task)
+       };
+       axios.post(url, task).then(todo => {
+         resolve( todo.data );
+       })
     } )
 }
 
 export const getTask = (id) => {
    return new Promise((resolve,reject) => {
-      const tasks = JSON.parse(localStorage.getItem('tasks')) || {}
-      const task = tasks[id]
-      resolve(task)
-   })
+      axios.get(`${url}/${id}`).then((res) => {
+         resolve(res.data)
+      });
+   });
 }
 
 export const deleteTask = (id) => {
     return new Promise((resolve,reject) => {
-       const tasks = JSON.parse(localStorage.getItem('tasks')) || {}
-       delete tasks[id]
-       localStorage.setItem('tasks', JSON.stringify(tasks))
-    })
+      axios.delete(`${url}/${id}`).then((res) => {
+         resolve(res.data) 
+      });
+    });
 }
 
 export const editTask = (id,title,desc) => {
     return new Promise((resolve,reject) => {
-       const tasks =  JSON.parse(localStorage.getItem('tasks')) || {}
-       tasks[id] = {id , title, desc}
-       localStorage.setItem('tasks',JSON.stringify(tasks))
-       resolve(tasks[id])
-
-    })
+      let task = {
+         title,
+         desc
+       };
+      axios.put(`${url}/${id}`, task).then((res) => {
+         resolve(res.data)
+      })
+    });
 }
 
